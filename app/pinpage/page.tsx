@@ -7,73 +7,32 @@ import { useGSAP } from "@gsap/react";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function StickyIntroPage() {
-  const stickyWrapRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  
+  gsap.to(".box",{
+    ScrollTrigger: {  
+trigger: ".container",
+start: "top center",
+end: "bottom top",
+scrub: true,
+    }
+  }
 
-  useGSAP(() => {
-    if (!stickyWrapRef.current || !videoRef.current) return;
-
-    // 비디오 자동 재생
-    videoRef.current.play();
-
-    // Sticky 배경 설정
-    ScrollTrigger.create({
-      trigger: stickyWrapRef.current,
-      start: "top top",
-      end: "bottom top",
-      pin: stickyWrapRef.current,
-      pinSpacing: true,
-      scrub: true,
-      anticipatePin: 1,
-    });
-
-    // 텍스트 애니메이션 (배경 위로 부드럽게 등장)
-    gsap.fromTo(
-      textRef.current,
-      {
-        y: 100,
-        opacity: 0,
-        scale: 0.9,
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1.5,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: stickyWrapRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          scrub: 2,
-        },
-      }
-    );
-  }, { scope: stickyWrapRef });
-
+  )
   return (
-    <>
+    <div  className="no-scrollbar-page">
       {/* Sticky Intro Section */}
-      <section className="sc-intro relative min-h-screen">
-        <div ref={stickyWrapRef} className="sticky-wrap h-screen w-full overflow-hidden">
-          {/* 배경 비디오 */}
-          <div className="intro__bg absolute inset-0 w-full h-full">
-            <video
-              ref={videoRef}
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-              poster="/assets/images/intro-poster.jpg"
-            >
-              <source src="/assets/video/intro-bg.mp4" type="video/mp4" />
-            </video>
-          </div>
+      <section className="sc-intro relative h-screen w-full ">
+        <div  className="sticky-wrap h-screen w-full overflow-hidden">
+        <div>
+          <video id="Video" autoPlay muted loop className="absolute top-0 left-0 w-full h-full object-cover z-0">
+            <source src="/Bacteria_blue.mp4" type="video/mp4"></source>
+          </video>
+        </div>
 
           {/* 앞에 오는 텍스트 */}
           <div
-            ref={textRef}
+       
             className="group-intro-text absolute inset-0 flex flex-col justify-center items-center text-center text-white px-8 z-10"
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent drop-shadow-2xl">
@@ -90,12 +49,15 @@ export default function StickyIntroPage() {
       </section>
 
       {/* 다음 콘텐츠들 */}
-      <section className="h-screen bg-gradient-to-b from-slate-900 to-black flex items-center justify-center">
-        <h3 className="text-4xl text-white">다음 콘텐츠 영역</h3>
+      <section className="h-screen w-full bg-gradient-to-b from-slate-900 to-black flex items-center justify-center">
+        <h3 className="text-4xl text-white">우선 텍스트가 배치되어야 합니다
+          배경화면을 확인
+        
+        </h3>
       </section>
-      <section className="h-screen bg-slate-800 flex items-center justify-center">
-        <h3 className="text-4xl text-white">더 많은 콘텐츠...</h3>
+      <section className="h-screen w-full bg-slate-800 flex items-center justify-center">
+        <h3 className="text-4xl text-white"> 정상적으로 텍스트가 넘어가졌나요?</h3>
       </section>
-    </>
+    </div>
   );
 }

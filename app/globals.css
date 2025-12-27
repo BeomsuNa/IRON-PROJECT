@@ -292,6 +292,27 @@ body {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.no-scrollbar-page {
+  height: 100vh;
+  overflow-y: scroll;      /* 스크롤 동작은 유지 */
+}
+
+/* WebKit 계열 (Chrome, Safari, Edge 등) */
+.no-scrollbar-page::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Firefox */
+.no-scrollbar-page {
+  scrollbar-width: none;
+}
+
+/* 구형 IE / Edge 레거시 */
+.no-scrollbar-page {
+  -ms-overflow-style: none;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

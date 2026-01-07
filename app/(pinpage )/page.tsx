@@ -50,7 +50,7 @@ export default function Pinpage() {
           muted
           loop
           playsInline
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full"
         >
           <source src="/Bacteria_blue.mp4" type="video/mp4" />
         </video>

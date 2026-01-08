@@ -43,7 +43,7 @@ export default function Pinpage() {
   return (
     <div className="min-h-[400vh]">
       {/* pin 될 섹션: 흐름 안에 있어야 안정적 */}
-      <section ref={sectionRef} className="relative h-screen w-full overflow-hidden">
+      <section ref={sectionRef} className="relative h-screen w-full">
         {/* 배경 비디오 (레이어 0) */}
         <video
           autoPlay

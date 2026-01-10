@@ -41,22 +41,22 @@ export default function Pinpage() {
   }, []);
 
   return (
-    <div className="min-h-[400vh]">
+    <div className="min-h-[400vh] w-full">
       {/* pin 될 섹션: 흐름 안에 있어야 안정적 */}
-      <section ref={sectionRef} className="relative h-screen w-full">
+      <section ref={sectionRef} className="relative h-screen w-full w-screen overflow-hidden">
         {/* 배경 비디오 (레이어 0) */}
         <video
           autoPlay
           muted
           loop
           playsInline
-          className="absolute inset-0 h-full w-full"
+          className="absolute inset-0 h-full w-full object-cover"
         >
           <source src="/Bacteria_blue.mp4" type="video/mp4" />
         </video>
 
         {/* 어두워지는 오버레이 (레이어 1) */}
-        <div ref={overlayRef} className="absolute inset-0 bg-black opacity-0" />
+        <div ref={overlayRef} className="absolute inset-0 bg-black opacity-0 w-full" />
 
         {/* 텍스트/콘텐츠 (레이어 2) */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-8 text-white">

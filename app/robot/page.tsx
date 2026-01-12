@@ -8,8 +8,8 @@ export default function Home() {
 
       {/* 2. HTML 오버레이 (SEO 친화적인 정적 컨텐츠) */}
       <div className="absolute top-0 left-0 p-10 text-white z-10 pointer-events-none">
-        <h1 className="text-6xl font-bold m-0 tracking-tighter">OPTIMUS WEB</h1>
-        <p className="text-2xl mt-2 opacity-80">Collaborative AI Design System</p>
+        <h1 className="text-6xl font-bold m-0 tracking-tighter">FUTRURE MAZE</h1>
+        <p className="text-2xl mt-2 opacity-80">CSS PROJECT SITE 3D</p>
         
         {/* 상호작용 가능한 버튼 예시 (pointer-events-auto 필요) */}
         <button className="mt-8 px-6 py-3 bg-[#00ffcc] text-black font-bold rounded pointer-events-auto hover:bg-white transition-colors">

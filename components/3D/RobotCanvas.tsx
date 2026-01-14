@@ -17,7 +17,7 @@ export default function RobotCanvas() {
 
       {/* 2. 로봇 모델 (RobotScene) */}
       <Suspense fallback={null}>
-        <Center top>
+        <Center>
           <RobotScene /> 
         </Center>
       </Suspense>

@@ -77,8 +77,8 @@ export default function RobotScene(props: RobotModelProps) { // 이름 변경 �
 
     // A. 등장 애니메이션 (위치)
     gsap.fromTo(groupRef.current.position, 
-      { y: -5 }, 
-      { y: -1.2, duration: 1, ease: 'power3.out' } // 위치값 StudioStage에 맞게 조정 (-1.2 추천)
+      { y: 0 }, 
+      { y: -1.8, duration: 1, ease: 'power3.out' } // 위치값 StudioStage에 맞게 조정 (-1.2 추천)
     );
 
     // B. 등장 애니메이션 (크기)
@@ -87,15 +87,7 @@ export default function RobotScene(props: RobotModelProps) { // 이름 변경 �
       { x: 1.5, y: 1.5, z: 1.5, duration: 1.8, ease: 'back.out(1.2)', delay: 0.2 }
     );
 
-    // C. 부유 효과
-    gsap.to(groupRef.current.position, {
-      y: '-=0.15', 
-      duration: 2.5, 
-      repeat: -1, 
-      yoyo: true, 
-      ease: 'sine.inOut',
-      delay: 2
-    });
+
 
   }, { scope: groupRef });
 

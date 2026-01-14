@@ -4,6 +4,7 @@ import { Environment, ContactShadows, Grid } from '@react-three/drei';
 export default function StudioStage() {
   return (
     <>
+    <axesHelper args={[5]} />
       {/* 1. 조명 설정 */}
       <ambientLight intensity={1.5} color="#ffffff" />
       <spotLight position={[5, 5, 5]} intensity={10} castShadow color="#ffffff" />
@@ -14,7 +15,7 @@ export default function StudioStage() {
 
       {/* 3. 바닥 그리드 (공학적 느낌) */}
       <Grid
-        position={[0, -0.01, 0]}
+        position={[0, -0.5, -0.4]}
         args={[10, 10]}
         cellSize={0.5}
         cellThickness={0.5}

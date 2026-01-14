@@ -12,7 +12,7 @@ export default function RootLayout({
   return (
 
       < div>
-        <header>
+        <header >
             <h2>해당 링크들을 클릭하세요</h2>
           <nav className='grid grid-rows-2 grid-cols-2 gap-4 '>
             <Button><Link href="/robot">3DImage</Link></Button>

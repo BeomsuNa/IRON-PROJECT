@@ -25,10 +25,6 @@ export default function IntroOverlay() {
         <div className="absolute top-0 left-0 p-10 text-black z-10 pointer-events-none" ref={containerRef}>
         <h1 className="text-6xl font-bold m-0 tracking-tighter opacity-0">FUTRURE MAZE</h1>
         <p className="text-2xl mt-2 opacity-80">CSS PROJECT SITE 3D</p>
-        
-        <button className="mt-8 px-6 py-3 bg-[#00ffcc] text-black font-bold rounded pointer-events-auto hover:bg-white transition-colors">
-          Start Project
-        </button>
       </div>
 
   )

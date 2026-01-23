@@ -29,7 +29,7 @@ export default function RobotScene({ isHologram, ...props }: { isHologram: boole
     if (isHologram) {
       groupRef.current.visible = false;
     } else {
-      groupRef.current.scale.set(0, 0, 1);
+      groupRef.current.scale.set(0, 0, 0);
       // 홀로그램 재질
       scene.traverse((obj) => {
         if (!(obj instanceof THREE.Mesh)) return;

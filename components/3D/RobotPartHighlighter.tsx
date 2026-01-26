@@ -70,7 +70,7 @@ export default function RobotPartHighlighter({ scene }: RobotPartHighlighterProp
       left: '10%', 
       transform: 'translateY(-50%)', 
       pointerEvents: 'auto',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.0)',
       padding: '20px',
       borderRadius: '10px',
       color: 'white'

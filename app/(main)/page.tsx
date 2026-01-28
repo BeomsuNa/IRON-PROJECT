@@ -11,60 +11,58 @@ export default function Page({
 }: {
   children: React.ReactNode;
 }) {
-  const [text, setText] = useState("WC\nIC");
+  const fulltext = "WHAT EVERYONE CAN DO ONLY I CAN DO";
+  const logo = "WCIC";
   const textRef = useRef<HTMLHeadingElement>(null);
+  const fullTextRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+
+
 
   useEffect(() => {
-    if (!textRef.current) return;
-
-    // 텍스트를 글자별로 분리
-    const letters = textRef.current.querySelectorAll('span');
     const tl = gsap.timeline();
 
-    // 단계 1: 텍스트 등장 (기존처럼)
-    tl.fromTo(letters, { opacity: 0 }, { opacity: 1, duration: 1, stagger: 0.05 });
+    // 단계 1: WCIC 로고 등장
+    if (textRef.current) {
+      const letters = textRef.current.querySelectorAll('span');
+      tl.fromTo(letters, { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 1, stagger: 0.1 });
+      
+      tl.fromTo(textRef.current, { y: 0, scale: 1 }, { y: -50, scale: 1.3, duration: 2 });
+    }
 
-    // 단계 2: 특정 글자(W, C, I, C)를 제외한 나머지를 fade out
-    // "WC\nIC"의 인덱스: W(0), C(1), I(2), C(3) - 모든 span 유지
-    const keepIndices = [0, 1, 2, 3];
-    // letters.forEach 생략 - fade out 없음
+    // 단계 2: fulltext 아래에서 위로 fade in
+    if (fullTextRef.current) {
+      tl.fromTo(fullTextRef.current, { y: 0, opacity: 0 }, { y: -40, opacity: 1, duration: 0.5 }, "+=0.2");
+    }
 
-    // 단계 3: 남은 글자들을 중앙으로 모으기 (WC와 IC를 각각 그룹으로)
-    const keptLetters = keepIndices.map(i => letters[i]);
-    const containerWidth = textRef.current.offsetWidth;
-    const centerX = containerWidth / 2;
-    // WC 그룹 (인덱스 0,1): 왼쪽 중앙
-    const wcGroup = [keptLetters[0], keptLetters[1]];
-    wcGroup.forEach((letter, i) => {
-      if(!textRef.current) return;
-      const letterRect = letter.getBoundingClientRect();
-      const currentX = letterRect.left - textRef.current.getBoundingClientRect().left;
-      const targetX = centerX - 30 + i * 20; // WC 중앙 왼쪽
-      tl.to(letter, { x: targetX - currentX, duration: 1, ease: "power2.out" }, "-=0.5");
-    });
-    // IC 그룹 (인덱스 2,3): 오른쪽 중앙
-    const icGroup = [keptLetters[2], keptLetters[3]];
-    icGroup.forEach((letter, i) => {
-      if(!textRef.current) return;
-      const letterRect = letter.getBoundingClientRect();
-      const currentX = letterRect.left - textRef.current.getBoundingClientRect().left;
-      const targetX = centerX + 10 + i * 20; // IC 중앙 오른쪽
-      tl.to(letter, { x: targetX - currentX, duration: 1, ease: "power2.out" }, "-=0.5");
-    });
+    // 단계 3: 네비게이션 페이드인 (현재 위치 유지, 한 줄로 정렬)
+    if (navRef.current) {
+      tl.fromTo(navRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, "+=0.1");
+    }
 
-    // 단계 4: 최종 "WCIC" 형태로 유지 (추가 애니메이션 없음, 그대로 유지)
-    tl.to(keptLetters, { scale: 1.2, duration: 0.5 }); // 로고 느낌으로 살짝 확대
+    // 로고의 C 글자들에 별도 애니메이션 추가
+    if (textRef.current) {
+      const cLetters = textRef.current.querySelectorAll('.char-C');
+      const lastC = textRef.current.querySelector('.char-C-last');
 
-  }, [text]);
-
-  // 텍스트를 글자별로 span으로 분리, 줄바꿈 처리
-  const renderText = (text: string) => {
-    return text.split('').map((char, index) => {
-      if (char === '\n') {
-        return <br key={index} />;
+      if (cLetters.length) {
+        gsap.to(cLetters, { x: 8, repeat: -1, yoyo: true, duration: 0.6, ease: 'sine.inOut', stagger: 0.1, delay: 0.5 });
       }
+
+      if (lastC) {
+        gsap.to(lastC, { rotation: 360, duration: 2, repeat: -1, ease: 'linear', transformOrigin: '50% 50%', delay: 0.5 });
+      }
+    }
+  }, []);
+
+  // 텍스트를 글자별로 span으로 분리
+  const renderText = (text: string) => {
+    const lastCIndex = text.lastIndexOf('C');
+    return text.split('').map((char, index) => {
+      const isC = char === 'C';
+      const className = isC ? (index === lastCIndex ? 'char-C char-C-last' : 'char-C') : '';
       return (
-        <span key={index} style={{ display: 'inline-block' }}>
+        <span key={index} className={className} style={{ display: 'inline-block' }}>
           {char === ' ' ? '\u00A0' : char}
         </span>
       );
@@ -73,25 +71,41 @@ export default function Page({
 
   return (
     <div className="min-h-screen text-white">
-      {/* Hero Section - OCCUPY 스타일 흉내 */}
-      <section className="flex flex-col items-start justify-start h-screen text-center px-4 pt-16">
-        <h1 ref={textRef} className="text-4xl sm:text-6xl md:text-8xl font-bold uppercase tracking-wider mb-8 text-center">
-          {renderText(text)}
+      <section className="flex flex-col items-center justify-center h-screen px-4 pt-16">
+        {/* WCIC 로고 */}
+        <h1 ref={textRef} className="text-8xl sm:text-8xl md:text-8xl font-bold uppercase tracking-wider mb-8">
+          {renderText(logo)}
         </h1>
+
+        {/* 긴 텍스트 설명 */}
+        <div ref={fullTextRef} className="text-sm sm:text-base md:text-lg font-light uppercase tracking-wider text-center max-w-2xl" style={{ opacity: 0 }}>
+          {fulltext}
+        </div>
               
-        <nav className="grid grid-cols-2 gap-8 max-w-md self-center">
-          <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
-            <Link href="/robot">3D Image</Link>
-          </Button>
-          <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
-            <Link href="/pinpage">Pin Page</Link>
-          </Button>
-          <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
-            <Link href="/scrollpage">Scroll Page</Link>
-          </Button>
-          <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
-            <Link href="/csspage">CSS Page</Link>
-          </Button>
+        <nav ref={navRef} className="flex w-full justify-center self-center" style={{ opacity: 0}}>
+          <div style={{ width: '25vw', display: 'flex', justifyContent: 'center' }}>
+            <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
+              <Link href="/robot">3D Image</Link>
+            </Button>
+          </div>
+
+          <div style={{ width: '25vw', display: 'flex', justifyContent: 'center' }}>
+            <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
+              <Link href="/pinpage">Pin Page</Link>
+            </Button>
+          </div>
+
+          <div style={{ width: '25vw', display: 'flex', justifyContent: 'center' }}>
+            <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
+              <Link href="/scrollpage">Scroll Page</Link>
+            </Button>
+          </div>
+
+          <div style={{ width: '25vw', display: 'flex', justifyContent: 'center' }}>
+            <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
+              <Link href="/csspage">CSS Page</Link>
+            </Button>
+          </div>
         </nav>
       </section>
       <main>{children}</main>

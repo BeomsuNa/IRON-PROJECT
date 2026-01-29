@@ -83,7 +83,7 @@ export default function Page({
           {fulltext}
         </div>
               
-        <nav ref={navRef} className="flex w-full justify-center self-center" style={{ opacity: 0}}>
+        <nav ref={navRef} className="flex w-full justify-center self-center" style={{ opacity: 1}}>
           <div style={{ width: '25vw', display: 'flex', justifyContent: 'center' }}>
             <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
               <Link href="/robot">3D Image</Link>

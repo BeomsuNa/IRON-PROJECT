@@ -104,7 +104,7 @@ export default function Page({
 
           <div style={{ width: '25vw', display: 'flex', justifyContent: 'center' }}>
             <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-black transition duration-300">
-              <Link href="/csspage">CSS Page</Link>
+              <Link href="/csspage">CSS Pag</Link>
             </Button>
           </div>
         </nav>

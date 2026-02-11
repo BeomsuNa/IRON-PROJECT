@@ -56,7 +56,7 @@ export default function PremiumPage() {
       {/* <FinalCTA /> */}
 
       {/* Footer */}
-      {/* <Footer /> */}
+      <Footer />
     </div>
   )
 }

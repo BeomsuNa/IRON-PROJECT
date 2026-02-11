@@ -79,17 +79,7 @@ const Hero: React.FC = () => {
     <section className="hero-section relative w-screen h-screen flex flex-col items-center justify-center overflow-hidden bg-black">
       {/* Background Video - CldVideoPlayer */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-        <CldVideoPlayer
-        id="hero-video"
-        width="1920"
-        height="1080"
-        src={process.env.NEXT_PUBLIC_CLOUDINARY_VIDEO_PUBLIC_ID as string}
-        autoplay={true}
- 
-        loop={true}
-        muted={true}
-        controls={false}  
-        />
+
         {/* Dark Overlay */}
         <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black/20 via-black/50 to-black/70 pointer-events-none" />
       </div>

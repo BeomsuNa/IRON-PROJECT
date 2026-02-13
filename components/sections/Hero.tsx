@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { gsap } from 'gsap'
 import './Hero.css'
 import { CldVideoPlayer } from 'next-cloudinary'
@@ -88,7 +89,7 @@ const Hero: React.FC = () => {
         {/* Main Headline */}
         <h1 ref={headlineRef} className="hero-headline text-7xl md:text-8xl font-black uppercase tracking-tighter mb-6 leading-none">
           {/* Character-by-character animation */}
-          {'I AM IRON MAN'.split('').map((char, i) => (
+          {'Go To STEAMPUNK'.split('').map((char, i) => (
             <span key={i}>
               {char === ' ' ? '\u00A0' : char}
             </span>
@@ -102,12 +103,21 @@ const Hero: React.FC = () => {
 
         {/* CTA Buttons */}
         <div ref={ctaContainerRef} className="flex flex-col sm:flex-row gap-4 mb-16">
-          <button className="hero-cta-primary px-8 py-3 bg-red-600 text-white font-semibold uppercase text-sm tracking-wider hover:bg-red-700 transition-all duration-300 hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]">
-            Explore the Arsenal
-          </button>
-          <button className="hero-cta-secondary px-8 py-3 border-2 border-white text-white font-semibold uppercase text-sm tracking-wider hover:bg-white hover:text-black transition-all duration-300">
-            Watch the Vision
-          </button>
+          <Link href="/robot">
+            <button className="hero-cta-primary px-8 py-3 bg-red-600 text-white font-semibold uppercase text-sm tracking-wider hover:bg-red-700 transition-all duration-300 hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]">
+              ROBOTPAGE
+            </button>
+          </Link>
+          <Link href="/scrollpage">
+            <button className="hero-cta-secondary px-8 py-3 border-2 border-white text-white font-semibold uppercase text-sm tracking-wider hover:bg-white hover:text-black transition-all duration-300">
+              Watch the Vision
+            </button>
+          </Link>
+          <Link href="/vision">
+            <button className="hero-cta-secondary px-8 py-3 border-2 border-white text-white font-semibold uppercase text-sm tracking-wider hover:bg-white hover:text-black transition-all duration-300">
+              Vision Page
+            </button>
+          </Link>
         </div>
 
         {/* Scroll Indicator */}

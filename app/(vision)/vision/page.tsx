@@ -1,56 +1,44 @@
 'use client';
 
 import CameraPermissionModal from '@/components/camera/CameraPermissionModal';
-import { useEffect, useRef, useState } from 'react';
+import { useCameraDetection, useCameraWithMediaPipe } from '@/lib/useCamera';
+import { useEffect, useState } from 'react';
 
 
 export default function IronManPage() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [cameraDetected, setCameraDetected] = useState<boolean | null>(null);
+  const { detected: cameraDetected } = useCameraDetection();
   const [showPermissionModal, setShowPermissionModal] = useState(false);
-  const [cameraActive, setCameraActive] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
 
-  // 웹카메라 감지
+  const {
+    videoRef,
+    canvasRef,
+    isActive: cameraActive,
+    startCamera,
+    stopCamera
+  } = useCameraWithMediaPipe({
+    onResults: (results) => {
+      // 필요시 추가 결과 처리 로직
+    }
+  });
+
+
+  // 웹카메라 감지 시 모달 표시
   useEffect(() => {
-    const checkCameraAvailability = async () => {
-      try {
-        // 사용 가능한 미디어 기기 확인
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const hasCamera = devices.some((device) => device.kind === 'videoinput');
-        setCameraDetected(hasCamera);
-
-        if (hasCamera) {
-          // 카메라가 연결되어 있으면 권한 모달 표시
-          setShowPermissionModal(true);
-        }
-      } catch (error) {
-        console.error('카메라 확인 중 오류 발생:', error);
-        setCameraDetected(false);
-      }
-    };
-
-    checkCameraAvailability();
-  }, []);
+    if (cameraDetected === true) {
+      setShowPermissionModal(true);
+    }
+  }, [cameraDetected]);
 
   // 카메라 권한 승인 처리
   const handleCameraPermissionGranted = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
-        audio: false,
-      });
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setCameraActive(true);
-        setShowPermissionModal(false);
-        setPermissionDenied(false);
-      }
+      await startCamera();
+      setShowPermissionModal(false);
+      setPermissionDenied(false);
     } catch (error) {
       console.error('카메라 접근 실패:', error);
       setPermissionDenied(true);
-      setCameraActive(false);
     }
   };
 
@@ -58,18 +46,8 @@ export default function IronManPage() {
   const handleCameraPermissionDenied = () => {
     setShowPermissionModal(false);
     setPermissionDenied(true);
-    setCameraActive(false);
+    stopCamera();
   };
-
-  // 컴포넌트 언마운트 또는 카메라 비활성화 시 스트림 정지
-  useEffect(() => {
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
@@ -107,6 +85,12 @@ export default function IronManPage() {
                 autoPlay
                 playsInline
                 className="w-full h-full object-cover"
+                style={{ transform: 'scaleX(-1)' }} // 거울 모드
+              />
+              <canvas
+                ref={canvasRef}
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                style={{ transform: 'scaleX(-1)' }} // 거울 모드 대응
               />
               {!cameraActive && (
                 <div className="absolute inset-0 bg-black/70 flex items-center justify-center">

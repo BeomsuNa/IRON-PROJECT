@@ -4,59 +4,59 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="relative bg-black border-t border-white/10 py-12 md:py-16">
+    <footer className="relative bg-[#1a1008] border-t border-[#d4a017]/30 py-12 md:py-16 font-serif">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div>
-            <h3 className="text-lg font-black uppercase tracking-wider text-white mb-4">
-              IronMan <span className="text-red-600">AI</span>
+            <h3 className="text-lg font-black uppercase tracking-wider text-[#d4a017] mb-4">
+              STEAMPUNK <span className="text-[#8b4513]">WORKS</span>
             </h3>
-            <p className="text-sm text-gray-400">
-              Intelligence in Motion. Engineering the future of autonomous systems.
+            <p className="text-sm text-[#a68a56]">
+              Mechanical Intelligence. Engineering the steam-powered future of autonomous systems.
             </p>
           </div>
 
           {/* Products */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4">Product</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-red-400 transition-colors">Sentinel (SYNCRO)</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Recon (TRAKR)</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Nexus (ELIXIS)</a></li>
+            <h4 className="text-sm font-bold uppercase tracking-wider text-[#d4a017] mb-4">Machinery</h4>
+            <ul className="space-y-2 text-sm text-[#a68a56]">
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">The Sentinel</a></li>
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Steam Recon</a></li>
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Brass Nexus</a></li>
             </ul>
           </div>
 
           {/* Resources */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4">Resources</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-red-400 transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Developer SDK</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Blog</a></li>
+            <h4 className="text-sm font-bold uppercase tracking-wider text-[#d4a017] mb-4">Manuals</h4>
+            <ul className="space-y-2 text-sm text-[#a68a56]">
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Blueprints</a></li>
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Operator SDK</a></li>
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Gazette</a></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-red-400 transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-red-400 transition-colors">Cookies</a></li>
+            <h4 className="text-sm font-bold uppercase tracking-wider text-[#d4a017] mb-4">Charter</h4>
+            <ul className="space-y-2 text-sm text-[#a68a56]">
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Privacy Charter</a></li>
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Terms of Operation</a></li>
+              <li><a href="#" className="hover:text-[#d4a017] transition-colors">Mechanisms</a></li>
             </ul>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/10 mb-8" />
+        <div className="border-t border-[#d4a017]/20 mb-8" />
 
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Copyright */}
-          <p className="text-sm text-gray-500">
-            © {currentYear} IronMan Physical AI. All rights reserved.
+          <p className="text-sm text-[#a68a56]">
+            © {currentYear} Steampunk Works Ltd. All rights reserved.
           </p>
 
           {/* Social Links */}
@@ -65,7 +65,7 @@ const Footer: React.FC = () => {
               href="https://linkedin.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-red-600 hover:text-red-600 transition-all duration-300"
+              className="w-10 h-10 rounded-full bg-[#d4a017]/5 border border-[#d4a017]/20 flex items-center justify-center text-[#d4a017] hover:border-[#d4a017] hover:bg-[#d4a017]/10 transition-all duration-300 shadow-[0_0_10px_rgba(212,160,23,0.1)]"
               aria-label="LinkedIn"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
               href="https://twitter.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-red-600 hover:text-red-600 transition-all duration-300"
+              className="w-10 h-10 rounded-full bg-[#d4a017]/5 border border-[#d4a017]/20 flex items-center justify-center text-[#d4a017] hover:border-[#d4a017] hover:bg-[#d4a017]/10 transition-all duration-300 shadow-[0_0_10px_rgba(212,160,23,0.1)]"
               aria-label="Twitter"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -87,7 +87,7 @@ const Footer: React.FC = () => {
               href="https://youtube.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-red-600 hover:text-red-600 transition-all duration-300"
+              className="w-10 h-10 rounded-full bg-[#d4a017]/5 border border-[#d4a017]/20 flex items-center justify-center text-[#d4a017] hover:border-[#d4a017] hover:bg-[#d4a017]/10 transition-all duration-300 shadow-[0_0_10px_rgba(212,160,23,0.1)]"
               aria-label="YouTube"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

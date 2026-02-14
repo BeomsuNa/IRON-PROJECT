@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { gsap } from 'gsap'
 import './Hero.css'
+import { Button } from '@/components/ui/button'
 import { CldVideoPlayer } from 'next-cloudinary'
 import 'next-cloudinary/dist/cld-video-player.css'
 
@@ -77,19 +78,20 @@ const Hero: React.FC = () => {
   }, [])
 
   return (
-    <section className="hero-section relative w-screen h-screen flex flex-col items-center justify-center overflow-hidden bg-black">
-      {/* Background Video - CldVideoPlayer */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-
+    <section className="hero-section relative w-screen h-screen flex flex-col items-center justify-center overflow-hidden bg-[#2b1d0e]">
+      {/* Background Decor */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden opacity-30">
+        <div className="absolute top-10 left-10 w-64 h-64 border-8 border-[#d4a017] rounded-full animate-spin-slow opacity-20" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 border-8 border-[#d4a017] rounded-full animate-spin-slow opacity-10" style={{ animationDirection: 'reverse' }} />
         {/* Dark Overlay */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black/20 via-black/50 to-black/70 pointer-events-none" />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-[#2b1d0e]/20 via-[#2b1d0e]/50 to-[#2b1d0e]/70 pointer-events-none" />
       </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
         {/* Main Headline */}
-        <h1 ref={headlineRef} className="hero-headline text-7xl md:text-8xl font-black uppercase tracking-tighter mb-6 leading-none">
+        <h1 ref={headlineRef} className="hero-headline text-7xl md:text-8xl font-black uppercase tracking-tighter mb-6 leading-none text-[#d4a017] drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
           {/* Character-by-character animation */}
-          {'Go To STEAMPUNK'.split('').map((char, i) => (
+          {'STEAMPUNK'.split('').map((char, i) => (
             <span key={i}>
               {char === ' ' ? '\u00A0' : char}
             </span>
@@ -97,26 +99,26 @@ const Hero: React.FC = () => {
         </h1>
 
         {/* Subheadline */}
-        <div ref={subheadlineRef} className="hero-subheadline text-lg md:text-xl font-light tracking-wide max-w-3xl mx-auto mb-10 text-gray-300">
-        AND IT's YOUR NEXT TURN
+        <div ref={subheadlineRef} className="hero-subheadline text-lg md:text-xl font-serif italic tracking-wide max-w-3xl mx-auto mb-10 text-[#e2c98a]">
+        GEARING UP FOR YOUR NEXT TURN
         </div>
 
         {/* CTA Buttons */}
-        <div ref={ctaContainerRef} className="flex flex-col sm:flex-row gap-4 mb-16">
-          <Link href="/robot">
-            <button className="hero-cta-primary px-8 py-3 bg-red-600 text-white font-semibold uppercase text-sm tracking-wider hover:bg-red-700 transition-all duration-300 hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]">
-              ROBOTPAGE
-            </button>
+        <div ref={ctaContainerRef} className="flex flex-col sm:flex-row gap-12 mb-16 items-center">
+          <Link href="/vision" passHref legacyBehavior>
+            <Button variant="steampunk" size="lg" className="hover:rotate-12 transition-transform duration-500">
+              <span className="text-[10px] leading-tight font-bold">ENTER<br/>FACTORY</span>
+            </Button>
           </Link>
-          <Link href="/scrollpage">
-            <button className="hero-cta-secondary px-8 py-3 border-2 border-white text-white font-semibold uppercase text-sm tracking-wider hover:bg-white hover:text-black transition-all duration-300">
-              Watch the Vision
-            </button>
+          <Link href="/scrollpage" passHref legacyBehavior>
+            <Button variant="steampunk" size="default" className="hover:-rotate-12 transition-transform duration-500">
+              <span className="text-[9px] leading-tight font-bold">OBSERVE<br/>VISION</span>
+            </Button>
           </Link>
-          <Link href="/vision">
-            <button className="hero-cta-secondary px-8 py-3 border-2 border-white text-white font-semibold uppercase text-sm tracking-wider hover:bg-white hover:text-black transition-all duration-300">
-              Vision Page
-            </button>
+          <Link href="/vision" passHref legacyBehavior>
+            <Button variant="steampunk" size="default" className="hover:rotate-12 transition-transform duration-500">
+              <span className="text-[9px] leading-tight font-bold">ACTIVATE<br/>ROBOT</span>
+            </Button>
           </Link>
         </div>
 

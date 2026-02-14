@@ -9,7 +9,6 @@ import VisionMission from '@/components/sections/VisionMission'
 import ProductLineup from '@/components/sections/ProductLineup'
 import OrbitShowcase from '@/components/sections/OrbitShowcase'
 import ApplicationsGrid from '@/components/sections/ApplicationsGrid'
-import TechStack from '@/components/sections/TechStack'
 import Trust from '@/components/sections/Trust'
 import News from '@/components/sections/News'
 import FinalCTA from '@/components/sections/FinalCTA'
@@ -28,7 +27,9 @@ export default function PremiumPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#2b1d0e] text-[#e2c98a] overflow-x-hidden font-serif">
+      <div className="fixed inset-0 pointer-events-none opacity-20"
+           style={{ backgroundImage: 'radial-gradient(#d4a017 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       {/* Hero Section */}
       <Hero />
 

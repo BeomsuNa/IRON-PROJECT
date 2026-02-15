@@ -10,6 +10,11 @@
 			"env": {
 				"PERPLEXITY_API_KEY": "${NEXT_PUBLIC_PERPLEXITY_API_KEY}"
 			}
+		},
+		"my-mcp-server-9154e340": {
+			"type": "stdio",
+			"command": "mcp",
+			"args": []
 		}
 	},
 	"inputs": [

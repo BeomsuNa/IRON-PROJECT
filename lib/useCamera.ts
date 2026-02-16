@@ -114,21 +114,39 @@ export const useCameraDetection = () => {
   return { detected, error };
 };
 
-// MediaPipe 통합을 위한 훅 (나중에 확장)
+// MediaPipe 통합을 위한 훅
 type UseCameraWithMediaPipeOptions = UseCameraOptions & {
   modelAssetPath?: string;
   onResults?: (results: any) => void;
+  runningMode?: 'IMAGE' | 'VIDEO' | 'LIVE_STREAM';
+  maxNumHands?: number;
+  minHandDetectionConfidence?: number;
+  minHandPresenceConfidence?: number;
+  minTrackingConfidence?: number;
 };
 
 export const useCameraWithMediaPipe = (options: UseCameraWithMediaPipeOptions = {}) => {
-  const { modelAssetPath, onResults, ...cameraOptions } = options as UseCameraWithMediaPipeOptions;
+  const {
+    modelAssetPath,
+    onResults,
+    runningMode = 'LIVE_STREAM',
+    maxNumHands = 2,
+    minHandDetectionConfidence = 0.5,
+    minHandPresenceConfidence = 0.5,
+    minTrackingConfidence = 0.5,
+    ...cameraOptions
+  } = options;
+
   const camera = useCamera(cameraOptions);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediapipeInstance = useRef<any>(null);
   const rafRef = useRef<number | null>(null);
+  const [fps, setFps] = useState(0);
 
   useEffect(() => {
     let mounted = true;
+    let lastTime = performance.now();
+    let frameCount = 0;
 
     const initMediaPipe = async () => {
       if (!camera.isActive || !camera.videoRef.current) return;
@@ -145,8 +163,13 @@ export const useCameraWithMediaPipe = (options: UseCameraWithMediaPipeOptions = 
             modelAssetPath:
               modelAssetPath ||
               'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+            delegate: "GPU",
           },
-          runningMode: 'VIDEO',
+          runningMode: runningMode as any,
+          numHands: maxNumHands,
+          minHandDetectionConfidence: minHandDetectionConfidence,
+          minHandPresenceConfidence: minHandPresenceConfidence,
+          minTrackingConfidence: minTrackingConfidence,
         });
 
         mediapipeInstance.current = handLandmarker;
@@ -156,8 +179,24 @@ export const useCameraWithMediaPipe = (options: UseCameraWithMediaPipeOptions = 
 
           try {
             const now = performance.now();
-            const results = handLandmarker.detectForVideo(camera.videoRef.current, now);
+            let results;
+
+            // runningMode에 따라 처리 방식이 다를 수 있음 (여기서는 VIDEO/LIVE_STREAM 모두 detectForVideo 사용)
+            if (runningMode === 'VIDEO' || runningMode === 'LIVE_STREAM') {
+              results = handLandmarker.detectForVideo(camera.videoRef.current, now);
+            } else {
+              results = handLandmarker.detect(camera.videoRef.current);
+            }
+
             onResults?.(results);
+
+            // FPS Calculation
+            frameCount++;
+            if (now - lastTime >= 1000) {
+              setFps(Math.round((frameCount * 1000) / (now - lastTime)));
+              frameCount = 0;
+              lastTime = now;
+            }
 
             const canvas = canvasRef.current;
             if (canvas && camera.videoRef.current) {
@@ -168,7 +207,7 @@ export const useCameraWithMediaPipe = (options: UseCameraWithMediaPipeOptions = 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // 손 랜드마크 그리기 (여러 손 처리)
-                const hands = results?.landmarks || results?.landmarks || [];
+                const hands = results?.landmarks || [];
                 if (hands && hands.length) {
                   ctx.fillStyle = 'lime';
                   ctx.strokeStyle = 'rgba(0,255,0,0.6)';
@@ -232,10 +271,11 @@ export const useCameraWithMediaPipe = (options: UseCameraWithMediaPipeOptions = 
       if (mediapipeInstance.current?.close) mediapipeInstance.current.close();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera.isActive]);
+  }, [camera.isActive, runningMode, maxNumHands, minHandDetectionConfidence, minHandPresenceConfidence, minTrackingConfidence]);
 
   return {
     ...camera,
     canvasRef,
+    fps,
   };
 };

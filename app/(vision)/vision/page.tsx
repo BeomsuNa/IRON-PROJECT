@@ -15,8 +15,14 @@ export default function IronManPage() {
     canvasRef,
     isActive: cameraActive,
     startCamera,
-    stopCamera
+    stopCamera,
+    fps,
   } = useCameraWithMediaPipe({
+    runningMode: 'LIVE_STREAM',
+    maxNumHands: 2,
+    minHandDetectionConfidence: 0.5,
+    minHandPresenceConfidence: 0.5,
+    minTrackingConfidence: 0.5,
     onResults: (results) => {
       // 필요시 추가 결과 처리 로직
     }
@@ -76,10 +82,7 @@ export default function IronManPage() {
         {cameraDetected === true && (
           <div className="space-y-6">
             {/* 카메라 화면 */}
-            <div className="relative bg-black rounded-lg overflow-hidden border-4 border-blue-400 shadow-2xl"
-              style={{
-                aspectRatio: '16 / 9',
-              }}>
+            <div className={`relative bg-black rounded-lg overflow-hidden border-4 border-blue-400 shadow-2xl aspect-[3/4] md:aspect-[4/3]`}>
               <video
                 ref={videoRef}
                 autoPlay
@@ -112,15 +115,17 @@ export default function IronManPage() {
                   </div>
                 </div>
               )}
+              <div className="absolute top-2 right-2 bg-black/50 text-green-400 px-2 py-1 rounded text-xs font-mono z-10">
+                FPS: {fps}
+              </div>
             </div>
 
             {/* 상태 표시 */}
             <div className="flex items-center justify-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div
-                  className={`w-4 h-4 rounded-full ${
-                    cameraActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
-                  }`}
+                  className={`w-4 h-4 rounded-full ${cameraActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+                    }`}
                 />
                 <span className="text-gray-300">
                   {cameraActive ? '카메라 활성화' : '카메라 비활성화'}

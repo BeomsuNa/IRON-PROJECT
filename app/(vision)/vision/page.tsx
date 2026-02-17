@@ -2,13 +2,18 @@
 
 import CameraPermissionModal from '@/components/camera/CameraPermissionModal';
 import { useCameraDetection, useCameraWithMediaPipe } from '@/lib/useCamera';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { HandModel } from '@/components/3D/HandModel';
 
 
 export default function IronManPage() {
   const { detected: cameraDetected } = useCameraDetection();
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
+
+  // Ref to store landmarks for 3D model without re-renders
+  const landmarksRef = useRef<any[] | null>(null);
 
   const {
     videoRef,
@@ -24,7 +29,8 @@ export default function IronManPage() {
     minHandPresenceConfidence: 0.5,
     minTrackingConfidence: 0.5,
     onResults: (results) => {
-      // 필요시 추가 결과 처리 로직
+      // Store landmarks in ref for 3D model access
+      landmarksRef.current = results.landmarks;
     }
   });
 
@@ -95,6 +101,21 @@ export default function IronManPage() {
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 style={{ transform: 'scaleX(-1)' }} // 거울 모드 대응
               />
+
+              {/* 3D Overlay */}
+              <div className="absolute inset-0 pointer-events-none">
+                <Canvas
+                  camera={{ position: [0, 0, 5], fov: 50 }}
+                  className="w-full h-full"
+                  gl={{ alpha: true }} // Transparent background
+                >
+                  <ambientLight intensity={1} />
+                  <pointLight position={[10, 10, 10]} />
+                  <HandModel landmarksRef={landmarksRef} handIndex={0} />
+                  <HandModel landmarksRef={landmarksRef} handIndex={1} />
+                </Canvas>
+              </div>
+
               {!cameraActive && (
                 <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
                   <div className="text-center">

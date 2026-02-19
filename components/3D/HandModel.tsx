@@ -48,8 +48,8 @@ export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
         // If input image is mirrored, landmarks are mirrored.
 
         // Position
-        const x = (wrist.x - 0.5) * viewport.width * -1; // Flip X for mirror effect
-        const y = -(wrist.y - 0.5) * viewport.height;    // Flip Y because Three.js Y is up
+        const x = (wrist.x - 0.3) * viewport.width * -1; // Flip X for mirror effect
+        const y = -(wrist.y - 0.8) * viewport.height;    // Flip Y because Three.js Y is up
         const z = -wrist.z * 10; // Simple depth scaling, might need adjustment
 
         groupRef.current.position.set(x, y, z);

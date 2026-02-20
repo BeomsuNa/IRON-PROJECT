@@ -14,7 +14,21 @@ export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
     const { viewport } = useThree();
 
     // Clone scene so we can reuse for multiple hands
-    const clonedScene = useMemo(() => scene.clone(), [scene]);
+    const { clonedScene, wristOffset } = useMemo(() => {
+        const cloned = scene.clone();
+        const offset = new THREE.Vector3();
+
+        // Check both common case variations
+        const wristObj = cloned.getObjectByName('Object_28');
+
+        if (wristObj) {
+            // Ensure world matrices are updated to get accurate world position relative to scene root
+            cloned.updateWorldMatrix(true, true);
+            wristObj.getWorldPosition(offset);
+        }
+
+        return { clonedScene: cloned, wristOffset: offset };
+    }, [scene]);
 
     useFrame(() => {
         if (!groupRef.current) return;
@@ -47,39 +61,55 @@ export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
         // The landmarks from MediaPipe are relative to input image. 
         // If input image is mirrored, landmarks are mirrored.
 
-        // Position
-        const x = (wrist.x - 0.3) * viewport.width * -1; // Flip X for mirror effect
-        const y = -(wrist.y - 0.8) * viewport.height;    // Flip Y because Three.js Y is up
-        const z = -wrist.z * 10; // Simple depth scaling, might need adjustment
+        // Depth scaling factor (Z-axis)
+        const depthMultiplier = 25;
+
+        // Position calculation
+        // MediaPipe landmarks are 0..1. Map to viewport center.
+        const x = (wrist.x - 0.5) * viewport.width * -1; // Center and flip X for mirror effect
+        const y = -(wrist.y - 0.5) * viewport.height;    // Center and flip Y because Three.js Y is up
+        const z = -wrist.z * depthMultiplier; // Consistent depth scaling
 
         groupRef.current.position.set(x, y, z);
 
         // Orientation
-        // Vector from wrist to middle finger base
+        // Vector from wrist to middle finger base (MCP)
         const wristVec = new THREE.Vector3(x, y, z);
         const middleVec = new THREE.Vector3(
             (middleMCP.x - 0.5) * viewport.width * -1,
             -(middleMCP.y - 0.5) * viewport.height,
-            -middleMCP.z * 10
         );
 
         const direction = new THREE.Vector3().subVectors(middleVec, wristVec).normalize();
 
         // Calculate rotation to align model's forward vector with hand direction
-        // Assuming model faces +Z by default
         const targetLookAt = new THREE.Vector3().addVectors(wristVec, direction);
         groupRef.current.lookAt(targetLookAt);
 
-        // Simple scale based on hand size
+        // Scale calculation
+        // The distance between wrist and middle MCP in world space 
+        // will naturally decrease as the hand moves farther from the camera
+        // if they are mapped correctly to the viewport.
         const distance = wristVec.distanceTo(middleVec);
-        // Base scale of 10 might be too big/small depending on model unit 
-        // Hand distance is usually around 0.1-0.2 in normalized units?
-        // Let's start with a fixed scale for now to verify visibility first
-        const scale = distance * 5;
+
+        // This scale factor might need fine-tuning. 
+        // If the model is too big when far away, reduce this number.
+        const scaleMultiplier = 4;
+        const scale = distance * scaleMultiplier;
         groupRef.current.scale.set(scale, scale, scale);
     });
 
-    return <primitive object={clonedScene} ref={groupRef} />;
+    return (
+        <group ref={groupRef}>
+            <primitive
+                object={clonedScene}
+                position={wristOffset.clone().multiplyScalar(-1)}
+                // 전체 모델의 기본 각도를 여기서 90도씩 조정할 수 있습니다.
+                // [X, Y, Z] 라디안 단위 (Math.PI / 2 = 90도)
+                rotation={[-Math.PI / 2, Math.PI / 2, 0]}
+            />
+        </group>
+    );
 }
 
 useGLTF.preload('/models/steampunk_arm.glb');

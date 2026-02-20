@@ -49,7 +49,6 @@ export default function IronManPage() {
       setShowPermissionModal(false);
       setPermissionDenied(false);
     } catch (error) {
-      console.error('카메라 접근 실패:', error);
       setPermissionDenied(true);
     }
   };
@@ -62,8 +61,9 @@ export default function IronManPage() {
   };
 
   return (
+    // 배경 설정 부분 (Background settings here)
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-7xl">
         <h1 className="text-4xl font-bold text-white mb-8 text-center">
           Iron Man Interface
         </h1>
@@ -88,7 +88,7 @@ export default function IronManPage() {
         {cameraDetected === true && (
           <div className="space-y-6">
             {/* 카메라 화면 */}
-            <div className={`relative bg-black rounded-lg overflow-hidden border-4 border-blue-400 shadow-2xl aspect-[3/4] md:aspect-[4/3]`}>
+            <div className={`relative bg-black rounded-lg overflow-hidden border-4 border-blue-400 shadow-2xl aspect-[4/3] md:aspect-[16/16]`}>
               <video
                 ref={videoRef}
                 autoPlay

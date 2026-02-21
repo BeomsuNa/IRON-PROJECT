@@ -8,32 +8,64 @@ interface HandModelProps {
     handIndex?: number;
 }
 
+// Landmark mapping: MediaPipe ID -> Blender Object Name
+const LANDMARK_MAP: Record<number, string> = {
+    0: 'Object_28',   // Wrist
+    1: 'Object_179',  // Thumb CMC
+    2: 'Object_226',  // Thumb MCP
+    3: 'Object_228',  // Thumb IP
+    4: 'Object_230',  // Thumb TIP
+    5: 'Object_171',  // Index MCP
+    6: 'Object_216',  // Index PIP
+    7: 'Object_218',  // Index DIP
+    8: 'Object_312',  // Index TIP
+    9: 'Object_173',  // Middle MCP
+    10: 'Object_239', // Middle PIP
+    11: 'Object_241', // Middle DIP
+    12: 'Object_247', // Middle TIP
+    13: 'Object_175', // Ring MCP
+    14: 'Object_256', // Ring PIP
+    15: 'Object_258', // Ring DIP
+    16: 'Object_264', // Ring TIP
+    17: 'Object_214', // Pinky MCP
+    18: 'Object_275', // Pinky PIP
+    19: 'Object_277', // Pinky DIP
+    20: 'Object_283'  // Pinky TIP
+};
+
 export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
     const { scene } = useGLTF('/models/steampunk_arm.glb');
     const groupRef = useRef<THREE.Group>(null);
     const { viewport } = useThree();
 
-    // Clone scene so we can reuse for multiple hands
-    const { clonedScene, wristOffset } = useMemo(() => {
+    // Store references to the bones/objects for animation
+    const { clonedScene, wristOffset, joints } = useMemo(() => {
         const cloned = scene.clone();
         const offset = new THREE.Vector3();
+        const jointObjects: Record<number, THREE.Object3D> = {};
 
-        // Check both common case variations
-        const wristObj = cloned.getObjectByName('Object_28');
+        // Find and store all joint objects
+        Object.entries(LANDMARK_MAP).forEach(([id, name]) => {
+            const obj = cloned.getObjectByName(name);
+            if (obj) {
+                jointObjects[parseInt(id)] = obj;
+                console.log('obj확인완료', obj.name);
+            }
+        });
 
+        // Use the wrist (0) for initial offset
+        const wristObj = jointObjects[0];
         if (wristObj) {
-            // Ensure world matrices are updated to get accurate world position relative to scene root
             cloned.updateWorldMatrix(true, true);
             wristObj.getWorldPosition(offset);
         }
 
-        return { clonedScene: cloned, wristOffset: offset };
+        return { clonedScene: cloned, wristOffset: offset, joints: jointObjects };
     }, [scene]);
 
     useFrame(() => {
         if (!groupRef.current) return;
 
-        // Check if landmarks exist
         const landmarks = landmarksRef.current;
         if (!landmarks || !landmarks[handIndex]) {
             groupRef.current.visible = false;
@@ -48,55 +80,42 @@ export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
 
         groupRef.current.visible = true;
 
-        // Wrist
         const wrist = hand[0];
         const middleMCP = hand[9];
 
         if (!wrist || !middleMCP) return;
 
-        // Map normalized coordinates (0..1) to Three.js viewport coordinates
-        // MediaPipe: (0,0) top-left -> (1,1) bottom-right
-        // Three.js: (0,0) center, Y up.
-        // Also consider video mirroring if needed. Assuming video is mirrored via CSS scaleX(-1).
-        // The landmarks from MediaPipe are relative to input image. 
-        // If input image is mirrored, landmarks are mirrored.
-
-        // Depth scaling factor (Z-axis)
+        // Depth scaling factor
         const depthMultiplier = 25;
 
-        // Position calculation
-        // MediaPipe landmarks are 0..1. Map to viewport center.
-        const x = (wrist.x - 0.5) * viewport.width * -1; // Center and flip X for mirror effect
-        const y = -(wrist.y - 0.5) * viewport.height;    // Center and flip Y because Three.js Y is up
-        const z = -wrist.z * depthMultiplier; // Consistent depth scaling
+        // 1. Calculate main position (Wrist)
+        const x = (wrist.x - 0.5) * viewport.width * -1;
+        const y = -(wrist.y - 0.5) * viewport.height;
+        const z = -wrist.z * depthMultiplier;
 
         groupRef.current.position.set(x, y, z);
 
-        // Orientation
-        // Vector from wrist to middle finger base (MCP)
+        // 2. Calculate main orientation (Wrist to Middle MCP)
         const wristVec = new THREE.Vector3(x, y, z);
         const middleVec = new THREE.Vector3(
             (middleMCP.x - 0.5) * viewport.width * -1,
             -(middleMCP.y - 0.5) * viewport.height,
+            -middleMCP.z * depthMultiplier
         );
 
         const direction = new THREE.Vector3().subVectors(middleVec, wristVec).normalize();
-
-        // Calculate rotation to align model's forward vector with hand direction
         const targetLookAt = new THREE.Vector3().addVectors(wristVec, direction);
         groupRef.current.lookAt(targetLookAt);
 
-        // Scale calculation
-        // The distance between wrist and middle MCP in world space 
-        // will naturally decrease as the hand moves farther from the camera
-        // if they are mapped correctly to the viewport.
+        // 3. Calculate scale based on distance between landmarks
         const distance = wristVec.distanceTo(middleVec);
-
-        // This scale factor might need fine-tuning. 
-        // If the model is too big when far away, reduce this number.
         const scaleMultiplier = 4;
         const scale = distance * scaleMultiplier;
         groupRef.current.scale.set(scale, scale, scale);
+
+        // TODO: Individually rotate finger joints (joints[id])
+        // To make it look "active", we'll need to calculate relative rotations
+        // for each parent-child joint pair.
     });
 
     return (
@@ -104,6 +123,7 @@ export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
             <primitive
                 object={clonedScene}
                 position={wristOffset.clone().multiplyScalar(-1)}
+                // Keep the initial model rotation to align with MediaPipe's forward direction
                 rotation={[-Math.PI / 2, Math.PI / 2, 0]}
             />
         </group>

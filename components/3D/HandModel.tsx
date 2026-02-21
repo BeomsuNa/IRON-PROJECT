@@ -104,8 +104,6 @@ export function HandModel({ landmarksRef, handIndex = 0 }: HandModelProps) {
             <primitive
                 object={clonedScene}
                 position={wristOffset.clone().multiplyScalar(-1)}
-                // 전체 모델의 기본 각도를 여기서 90도씩 조정할 수 있습니다.
-                // [X, Y, Z] 라디안 단위 (Math.PI / 2 = 90도)
                 rotation={[-Math.PI / 2, Math.PI / 2, 0]}
             />
         </group>

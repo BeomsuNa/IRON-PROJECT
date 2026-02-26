@@ -12,8 +12,8 @@ export default function IronManPage() {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
 
-  // Ref to store landmarks for 3D model without re-renders
-  const landmarksRef = useRef<any[] | null>(null);
+  // Ref to store MediaPipe results for 3D model without re-renders
+  const handDataRef = useRef<{ landmarks: any[], handedness: any[] } | null>(null);
 
   const {
     videoRef,
@@ -29,8 +29,11 @@ export default function IronManPage() {
     minHandPresenceConfidence: 0.5,
     minTrackingConfidence: 0.5,
     onResults: (results) => {
-      // Store landmarks in ref for 3D model access
-      landmarksRef.current = results.landmarks;
+      // Store both landmarks and handedness
+      handDataRef.current = {
+        landmarks: results.landmarks || [],
+        handedness: results.handedness || []
+      };
     }
   });
 
@@ -111,8 +114,8 @@ export default function IronManPage() {
                 >
                   <ambientLight intensity={1} />
                   <pointLight position={[10, 10, 10]} />
-                  <HandModel landmarksRef={landmarksRef} handIndex={0} />
-                  <HandModel landmarksRef={landmarksRef} handIndex={1} />
+                  <HandModel handDataRef={handDataRef} handIndex={0} />
+                  <HandModel handDataRef={handDataRef} handIndex={1} />
                 </Canvas>
               </div>
 

@@ -9,28 +9,15 @@ interface HandModelProps {
 }
 
 // Landmark mapping: MediaPipe ID -> Blender Object Name
+
+// Updated LANDMARK_MAP based on user request (Object_241 -> Object_252, etc.)
 const LANDMARK_MAP: Record<number, string> = {
     0: 'Object_28',   // Wrist
-    1: 'Object_179',  // Thumb CMC
-    2: 'Object_226',  // Thumb MCP
-    3: 'Object_228',  // Thumb IP
-    4: 'Object_230',  // Thumb TIP
-    5: 'Object_171',  // Index MCP
-    6: 'Object_216',  // Index PIP
-    7: 'Object_218',  // Index DIP
-    8: 'Object_312',  // Index TIP
-    9: 'Object_173',  // Middle MCP
-    10: 'Object_239', // Middle PIP
-    11: 'Object_241', // Middle DIP
-    12: 'Object_247', // Middle TIP
-    13: 'Object_175', // Ring MCP
-    14: 'Object_256', // Ring PIP
-    15: 'Object_258', // Ring DIP
-    16: 'Object_264', // Ring TIP
-    17: 'Object_214', // Pinky MCP
-    18: 'Object_275', // Pinky PIP
-    19: 'Object_277', // Pinky DIP
-    20: 'Object_283'  // Pinky TIP
+    1: 'Object_179', 2: 'Object_226', 3: 'Object_228', 4: 'Object_230',// Thumb
+    5: 'Object_171', 6: 'Object_216', 7: 'Object_218', 8: 'Object_235', // Index
+    9: 'Object_210', 10: 'Object_239', 11: 'Object_241', 12: 'Object_247', // Middle
+    13: 'Object_212', 14: 'Object_256', 15: 'Object_258', 16: 'Object_264', // Ring
+    17: 'Object_214', 18: 'Object_275', 19: 'Object_277', 20: 'Object_283'  // Pinky
 };
 
 export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
@@ -39,11 +26,17 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
     // Debugging loading
     React.useEffect(() => {
         if (scene) {
-            console.log("Model Loaded Successfully:", scene);
+
+            // DEBUG: List all object names in the scene to verify mapping
+            const names: string[] = [];
+            scene.traverse((obj) => {
+                names.push(obj.name);
+            });
         }
     }, [scene]);
 
     const groupRef = useRef<THREE.Group>(null);
+    const hasLoggedRef = useRef(false);
     const { viewport } = useThree();
 
     // Store references to the bones/objects for animation
@@ -70,6 +63,7 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         if (wristObj) {
             wristObj.getWorldPosition(offset);
         }
+
 
         return { clonedScene: cloned, wristOffset: offset, joints: jointObjects };
     }, [scene]);
@@ -100,6 +94,17 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         const middleMCP = hand[9];
         const pinkyMCP = hand[17];
 
+        // One-time logging of landmarks and their parts
+        if (!hasLoggedRef.current) {
+            Object.entries(LANDMARK_MAP).forEach(([id, objectName]) => {
+                if (hand[parseInt(id)]) {
+
+                }
+            });
+            hasLoggedRef.current = true;
+        }
+
+
         if (!wrist || !middleMCP) return;
 
         // 1. Calculate main position (Wrist)
@@ -120,7 +125,8 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         );
 
         // 3. Calculate Orientation (Rotation)
-        const up = new THREE.Vector3(
+        // More precise "up" vector using all MCPs to define the hand plane
+        const handPlaneUp = new THREE.Vector3(
             -(middleMCP.x - wrist.x) * viewport.width,
             -(middleMCP.y - wrist.y) * viewport.height,
             (middleMCP.z - wrist.z) * -5
@@ -132,43 +138,52 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
             (pinkyMCP.z - indexMCP.z) * -5
         ).normalize();
 
-        const forward = new THREE.Vector3().crossVectors(side, up).normalize();
-
-        // Correct side for orthogonality
-        const orthoSide = new THREE.Vector3().crossVectors(up, forward).normalize();
+        const forward = new THREE.Vector3().crossVectors(side, handPlaneUp).normalize();
+        const orthoSide = new THREE.Vector3().crossVectors(handPlaneUp, forward).normalize();
 
         const matrix = new THREE.Matrix4();
-        // If mirrored, the coordinate system basis also needs adjustment or the quaternion will be flipped
-        matrix.makeBasis(orthoSide, up, forward);
+        matrix.makeBasis(orthoSide, handPlaneUp, forward);
         groupRef.current.quaternion.setFromRotationMatrix(matrix);
 
-        // 4. Update Joints (Finger movement)
+        // 4. Update Joints (Individual finger segments)
         Object.entries(joints).forEach(([idStr, obj]) => {
             const id = parseInt(idStr);
-
-            // Skip the wrist (0) in the finger loop since orientation handles it
-            // Also skip tips because they have no child bone to rotate
-            if (id === 0 || [4, 8, 12, 16, 20].includes(id)) return;
+            if (id === 0) return; // Wrist is handled by group orientation
 
             const landmark = hand[id];
-            const nextLandmark = hand[id + 1];
+            // Tip calculation logic: find the next landmark in the sequence
+            // For IP/DIP joints (last in our map), use the actual landmark TIP ID (4, 8, 12, 16, 20)
+            let nextId = id + 1;
+
+            const nextLandmark = hand[nextId];
 
             if (landmark && nextLandmark) {
-                // Calculate the vector from this joint to the next joint
-                const boneDir = new THREE.Vector3(
-                    -(nextLandmark.x - landmark.x),
-                    -(nextLandmark.y - landmark.y),
-                    (nextLandmark.z - landmark.z)
+                // Calculate target direction in world space
+                const targetDir = new THREE.Vector3(
+                    -(nextLandmark.x - landmark.x) * viewport.width,
+                    -(nextLandmark.y - landmark.y) * viewport.height,
+                    (nextLandmark.z - landmark.z) * -5
                 ).normalize();
 
-                // Rotate the bone from its default local direction (up) to the target direction
+                // Convert target direction to object's parent local space
+                if (obj.parent) {
+                    const parentWorldQuaternion = new THREE.Quaternion();
+                    obj.parent.getWorldQuaternion(parentWorldQuaternion);
+                    targetDir.applyQuaternion(parentWorldQuaternion.invert());
+                }
+
+                // Default bone direction is (0, 1, 0)
                 const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
-                    new THREE.Vector3(0, 1, 0), // Assumed default bone direction
-                    boneDir
+                    new THREE.Vector3(0, -1, 0),
+                    targetDir
                 );
 
-                // Low-pass filter (slerp) for smooth movement
-                obj.quaternion.slerp(targetQuaternion, 0.3);
+                // Specific joint weights (e.g., first joints only tilt 40%)
+                // MCP joints are 1, 5, 9, 13, 17
+                const isMCP = [1, 5, 9, 13, 17].includes(id);
+                const slerpAmount = isMCP ? 0.2 : 0.4; // Weighted movement for realism
+
+                obj.quaternion.slerp(targetQuaternion, slerpAmount);
             }
         });
     });

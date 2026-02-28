@@ -28,7 +28,7 @@ jobs:
         # 더 안정적인 공식 액션 사용
         uses: vercel/action@v0.1.0
         with:
-
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./

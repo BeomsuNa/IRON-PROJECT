@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import useRefs from 'react-use-refs'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const ApplicationsGrid: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const [ref1, ref2, ref3, ref4, ref5, ref6] = useRefs<HTMLDivElement>(null)
+  const cardsRefs = [ref1, ref2, ref3, ref4, ref5, ref6]
 
   const applications = [
     {
@@ -51,7 +53,8 @@ const ApplicationsGrid: React.FC = () => {
     if (!sectionRef.current) return
 
     // Stagger animation on scroll
-    cardsRef.current.forEach((card, index) => {
+    cardsRefs.forEach((ref) => {
+      const card = ref.current
       if (!card) return
 
       ScrollTrigger.create({
@@ -89,7 +92,7 @@ const ApplicationsGrid: React.FC = () => {
           {applications.map((app, index) => (
             <div
               key={app.id}
-              ref={(el) => (cardsRef.current[index] = el)}
+              ref={cardsRefs[index]}
               className="group relative p-8 bg-gradient-to-br from-white/5 to-white/0 border border-white/10 hover:border-red-600/50 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)]"
             >
               {/* Background tilt effect */}

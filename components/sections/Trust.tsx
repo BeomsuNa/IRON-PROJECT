@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import useRefs from 'react-use-refs'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const Trust: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const statsRef = useRef<(HTMLDivElement | null)[]>([])
+  const [ref1, ref2, ref3] = useRefs<HTMLDivElement>(null)
+  const statsRefs = [ref1, ref2, ref3]
 
   const stats = [
     { label: 'Countries', value: 15, icon: '🌍' },
@@ -21,18 +23,19 @@ const Trust: React.FC = () => {
       trigger: sectionRef.current,
       start: 'top 60%',
       onEnter: () => {
-        statsRef.current.forEach((ref, index) => {
-          if (!ref) return
+        statsRefs.forEach((ref, index) => {
+          const el = ref.current
+          if (!el) return
 
           // Animate stat boxes
           gsap.fromTo(
-            ref,
+            el,
             { opacity: 0, scale: 0.8 },
             { opacity: 1, scale: 1, duration: 0.6, delay: index * 0.15, ease: 'back.out' }
           )
 
           // Animate counter numbers
-          const numberEl = ref.querySelector('.stat-number')
+          const numberEl = el.querySelector('.stat-number')
           if (numberEl) {
             const finalValue = parseInt(numberEl.textContent || '0')
             gsap.fromTo(
@@ -75,7 +78,7 @@ const Trust: React.FC = () => {
           {stats.map((stat, index) => (
             <div
               key={stat.label}
-              ref={(el) => (statsRef.current[index] = el)}
+              ref={statsRefs[index]}
               className="p-8 bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-lg text-center opacity-0"
             >
               <div className="text-5xl mb-4">{stat.icon}</div>

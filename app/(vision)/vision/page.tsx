@@ -2,10 +2,13 @@
 
 import CameraPermissionModal from '@/components/camera/CameraPermissionModal';
 import { useCameraDetection, useCameraWithMediaPipe } from '@/lib/useCamera';
-import { useEffect, useState, useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { HandModel } from '@/components/3D/HandModel';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 
+const HandVisualizer = dynamic(() => import('@/components/3D/HandVisualizer'), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-black/20 animate-pulse" />
+});
 
 export default function IronManPage() {
   const { detected: cameraDetected } = useCameraDetection();
@@ -107,16 +110,9 @@ export default function IronManPage() {
 
               {/* 3D Overlay */}
               <div className="absolute inset-0 pointer-events-none">
-                <Canvas
-                  camera={{ position: [0, 0, 5], fov: 50 }}
-                  className="w-full h-full"
-                  gl={{ alpha: true }} // Transparent background
-                >
-                  <ambientLight intensity={1} />
-                  <pointLight position={[10, 10, 10]} />
-                  <HandModel handDataRef={handDataRef} handIndex={0} />
-                  <HandModel handDataRef={handDataRef} handIndex={1} />
-                </Canvas>
+                <Suspense fallback={null}>
+                  <HandVisualizer handDataRef={handDataRef} />
+                </Suspense>
               </div>
 
               {!cameraActive && (

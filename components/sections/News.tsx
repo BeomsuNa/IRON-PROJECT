@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import useRefs from 'react-use-refs'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const News: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const [ref1, ref2, ref3] = useRefs<HTMLDivElement>(null)
+  const articleRefs = [ref1, ref2, ref3]
 
   const articles = [
     {
@@ -43,12 +45,13 @@ const News: React.FC = () => {
       trigger: sectionRef.current,
       start: 'top 60%',
       onEnter: () => {
-        cardsRef.current.forEach((card, index) => {
+        articleRefs.forEach((ref, index) => {
+          const card = ref.current
           if (card) {
             gsap.fromTo(
               card,
               { opacity: 0, y: 40 },
-              { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out' }
+              { opacity: 1, y: 0, duration: 0.6, delay: index * 0.1, ease: 'power2.out' }
             )
           }
         })
@@ -77,7 +80,7 @@ const News: React.FC = () => {
           {articles.map((article, index) => (
             <div
               key={article.id}
-              ref={(el) => (cardsRef.current[index] = el)}
+              ref={articleRefs[index]}
               className="group relative p-8 bg-gradient-to-br from-white/5 to-white/0 border border-white/10 hover:border-red-600/50 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)]"
             >
               {/* Article Icon */}

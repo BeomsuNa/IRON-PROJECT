@@ -25,7 +25,8 @@ jobs:
       
       - name: 3. Token Preview (Safe)
         if: env.VERCEL_TOKEN != ''
-        run: echo "VERCEL_TOKEN starts with: ${VERCEL_TOKEN:0:10}"
+        run: 
+        echo "VERCEL_TOKEN starts with: ${VERCEL_TOKEN:0:10}"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       

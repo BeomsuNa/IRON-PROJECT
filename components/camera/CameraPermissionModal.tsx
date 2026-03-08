@@ -3,96 +3,61 @@
 import React from 'react';
 
 interface CameraPermissionModalProps {
-  onGranted: () => void;
-  onDenied: () => void;
+    onGranted: () => void;
+    onDenied: () => void;
 }
 
-export default function CameraPermissionModal({
-  onGranted,
-  onDenied,
-}: CameraPermissionModalProps) {
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl shadow-2xl max-w-sm w-full border border-blue-400/30 backdrop-blur-sm">
-        {/* 헤더 */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-blue-400 p-6 rounded-t-2xl">
-          <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
-            <span className="text-3xl">🎥</span>
-            <span>카메라 권한 요청</span>
-          </h2>
-        </div>
+const CameraPermissionModal: React.FC<CameraPermissionModalProps> = ({ onGranted, onDenied }) => {
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <div className="max-w-md w-full bg-[#1a0d05] border-4 border-[#b87333] p-8 shadow-[0_0_50px_rgba(184,115,51,0.4)] relative overflow-hidden">
+                {/* Decorative Rivets */}
+                <div className="absolute top-2 left-2 w-2 h-2 rounded-full bg-[#5d3a1a]" />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#5d3a1a]" />
+                <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-[#5d3a1a]" />
+                <div className="absolute bottom-2 right-2 w-2 h-2 rounded-full bg-[#5d3a1a]" />
 
-        {/* 콘텐츠 */}
-        <div className="p-6 space-y-6">
-          <div className="space-y-4">
-            <p className="text-gray-200 font-semibold leading-relaxed">
-              Iron Man 인터페이스를 사용하기 위해 웹카메라 접근 권한이 필요합니다.
-            </p>
+                <div className="text-center relative z-10">
+                    <h2 className="text-2xl font-black text-[#e3a857] mb-6 uppercase tracking-widest italic border-b-2 border-[#b87333]/30 pb-4">
+                        Biometric Link Request
+                    </h2>
+                    <p className="text-[#b87333] mb-8 leading-relaxed font-serif italic text-sm">
+                        To interface with the Victorian Digital Engine, we require authorization to engage your thermal-optical sensors.
+                    </p>
 
-            {/* 권한 설명 */}
-            <div className="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4 space-y-3">
-              <div className="flex items-start space-x-3">
-                <span className="text-blue-400 font-bold text-lg mt-1">✓</span>
-                <div>
-                  <p className="text-blue-100 font-semibold">카메라 접근</p>
-                  <p className="text-gray-300 text-sm">
-                    실시간 얼굴 인식 및 모션 추적
-                  </p>
+                    <div className="flex flex-col gap-4">
+                        <button
+                            onClick={onGranted}
+                            className="w-full py-4 bg-gradient-to-b from-[#e3a857] to-[#8b4513] text-white font-black uppercase tracking-[0.2em] border-2 border-[#5d3a1a] shadow-lg hover:from-[#f5c38c] hover:to-[#a0522d] transition-all active:scale-95"
+                        >
+                            Authorize Integration
+                        </button>
+                        <button
+                            onClick={onDenied}
+                            className="w-full py-2 text-[#8b4513] font-bold uppercase tracking-widest text-xs hover:text-[#e3a857] transition-colors"
+                        >
+                            Abort Sequence
+                        </button>
+                    </div>
                 </div>
-              </div>
 
-              <div className="flex items-start space-x-3">
-                <span className="text-blue-400 font-bold text-lg mt-1">✓</span>
-                <div>
-                  <p className="text-blue-100 font-semibold">MediaPipe 적용</p>
-                  <p className="text-gray-300 text-sm">
-                    고급 AI 감지 모델 활용
-                  </p>
+                {/* Background Gears Watermark */}
+                <div className="absolute -bottom-10 -right-10 opacity-5 pointer-events-none">
+                    <div className="w-40 h-40 border-8 border-[#e3a857] rounded-full animate-spin-slow" />
                 </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <span className="text-blue-400 font-bold text-lg mt-1">✓</span>
-                <div>
-                  <p className="text-blue-100 font-semibold">개인정보 보호</p>
-                  <p className="text-gray-300 text-sm">
-                    모든 처리는 로컬에서만 진행됩니다
-                  </p>
-                </div>
-              </div>
             </div>
 
-            <p className="text-gray-400 text-sm italic border-l-2 border-yellow-400 pl-3">
-              💡 팁: 이 페이지를 나가거나 다른 탭으로 전환하면 카메라 스트림이 자동으로
-              정지됩니다.
-            </p>
-          </div>
+            <style jsx>{`
+                @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .animate-spin-slow {
+                    animation: spin-slow 20s linear infinite;
+                }
+            `}</style>
         </div>
+    );
+};
 
-        {/* 버튼 */}
-        <div className="flex gap-3 p-6 bg-gray-900/50 rounded-b-2xl border-t border-gray-700">
-          <button
-            onClick={onDenied}
-            className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold rounded-lg transition-colors duration-200"
-          >
-            거부
-          </button>
-
-          <button
-            onClick={onGranted}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/50"
-          >
-            동의
-          </button>
-        </div>
-
-        {/* 주의 사항 */}
-        <div className="px-6 pb-6">
-          <p className="text-xs text-gray-500 text-center">
-            권한을 거부해도 나중에 언제든지 다시 요청할 수 있습니다.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default CameraPermissionModal;

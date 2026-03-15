@@ -10,16 +10,16 @@ interface HandModelProps {
 }
 
 const LANDMARK_MAP: Record<number, string> = {
-    0: 'Object_28',
-    1: 'Object_179', 2: 'Object_226', 3: 'Object_228', 4: 'Object_230',
-    5: 'Object_171', 6: 'Object_216', 7: 'Object_218', 8: 'Object_235',
-    9: 'Object_210', 10: 'Object_239', 11: 'Object_241', 12: 'Object_247',
-    13: 'Object_212', 14: 'Object_256', 15: 'Object_258', 16: 'Object_264',
-    17: 'Object_214', 18: 'Object_275', 19: 'Object_277', 20: 'Object_283'
+    0: 'Object_28',   // Wrist
+    1: 'Object_179', 2: 'Object_226', 3: 'Object_228', 4: 'Object_230', // Thumb (approx)
+    5: 'Cylinder.002_98', 6: 'Cylinder.032_110', 7: 'Cylinder.033_111', 8: 'Cube.034_Piece.005_148', // Index
+    9: 'Object_210', 10: 'Object_239', 11: 'Object_241', 12: 'Object_247', // Middle
+    13: 'Object_212', 14: 'Object_256', 15: 'Object_258', 16: 'Object_264', // Ring
+    17: 'Object_214', 18: 'Object_275', 19: 'Object_277', 20: 'Object_283'  // Pinky
 };
 
 export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
-    const { scene } = useGLTF('/models/steampunk_arm.glb');
+    const { scene } = useGLTF('/models/steampunk_arm_test.glb');
     const groupRef = useRef<THREE.Group>(null);
     const repulsorRef = useRef<THREE.Mesh>(null);
     const repulsorLightRef = useRef<THREE.PointLight>(null);
@@ -68,14 +68,14 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         const middleMCP = hand[9];
         const pinkyMCP = hand[17];
 
-        if (!wrist || !middleMCP) return;
+        if (!wrist || !middleMCP || !indexMCP || !pinkyMCP) return;
 
         const x = (wrist.x - 0.5) * viewport.width * -1;
         const y = -(wrist.y - 0.5) * viewport.height;
         const z = wrist.z * -5;
         groupRef.current.position.set(x, y, z);
 
-        const baseScale = 4;
+        const baseScale = 6;
         groupRef.current.scale.set(baseScale * (isRightHand ? -1 : 1), baseScale, baseScale);
 
         const handPlaneUp = new THREE.Vector3(
@@ -118,6 +118,7 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
 
         Object.entries(joints).forEach(([idStr, obj]) => {
             const id = parseInt(idStr);
+            // Tips don't have a child to look at for direction
             if (id === 0 || [4, 8, 12, 16, 20].includes(id)) return;
 
             const landmark = hand[id];
@@ -141,7 +142,18 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
                     targetDir
                 );
 
-                obj.quaternion.slerp(targetQuaternion, [1, 5, 9, 13, 17].includes(id) ? 0.15 : 0.3);
+                // Hierarchy-based slerp for natural cascading effect
+                // Speed increases from Root to Tip for a "folding" look
+                let slerpFactor = 0.2;
+                const isRoot = [1, 5, 9, 13, 17].includes(id);     // MCP
+                const isMiddle = [2, 6, 10, 14, 18].includes(id);   // PIP
+                const isDistal = [3, 7, 11, 15, 19].includes(id);   // DIP
+
+                if (isRoot) slerpFactor = 0.1;      // Root: deliberate
+                else if (isMiddle) slerpFactor = 0.25; // Middle: active
+                else if (isDistal) slerpFactor = 0.4;  // Distal: snappy wrapping
+
+                obj.quaternion.slerp(targetQuaternion, slerpFactor);
             }
         });
     });

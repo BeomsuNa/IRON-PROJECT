@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { HandLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
-import { detectGesture } from '@/lib/GestureUtils';
+
 
 interface Landmark {
     x: number;
@@ -97,20 +97,32 @@ const HandLandmarksDetector: React.FC<HandLandmarksDetectorProps> = ({
         const startTimeMs = performance.now();
         const results = landmarker.detectForVideo(videoRef.current, startTimeMs);
 
-        if (results.landmarks) {
+        if (results.landmarks && results.landmarks.length > 0) {
             const rawLandmarks = results.landmarks as unknown as Landmark[][];
             const filteredLandmarks = validateAndFilter(rawLandmarks);
             lastLandmarksRef.current = filteredLandmarks;
 
-            const gestures = filteredLandmarks.map(hand => detectGesture(hand));
             const handedness = results.handedness ? results.handedness.map(h => h[0].displayName) : [];
+            const confidence = results.handedness ? results.handedness.reduce((acc, h) => acc + h[0].score, 0) / results.handedness.length : 0;
+            const gestures = filteredLandmarks.map(() => 'NONE');
 
-            onResults?.({
-                landmarks: filteredLandmarks,
-                confidence: results.handedness?.[0]?.[0]?.score || 0,
-                handedness: handedness,
-                gestures: gestures,
+            if (onResults) {
+                onResults({
+                    landmarks: filteredLandmarks,
+                    confidence: confidence,
+                    handedness: handedness,
+                    gestures: gestures
+                });
+            }
+        } else if (onResults) {
+            // Send empty data when no hands are detected to clear UI states
+            onResults({
+                landmarks: [],
+                confidence: 0,
+                handedness: [],
+                gestures: []
             });
+            lastLandmarksRef.current = [];
         }
 
         requestRef.current = requestAnimationFrame(predict);

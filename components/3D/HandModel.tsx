@@ -2,24 +2,37 @@ import React, { useRef, useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { detectGesture } from '@/lib/GestureUtils';
+
 
 interface HandModelProps {
     handDataRef: React.RefObject<{ landmarks: any[], handedness: any[] } | null>;
     handIndex?: number;
 }
 
-const LANDMARK_MAP: Record<number, string> = {
-    0: 'Object_28',   // Wrist
-    1: 'Object_179', 2: 'Object_226', 3: 'Object_228', 4: 'Object_230', // Thumb (approx)
-    5: 'Cylinder.002_98', 6: 'Cylinder.032_110', 7: 'Cylinder.033_111', 8: 'Cube.034_Piece.005_148', // Index
-    9: 'Object_210', 10: 'Object_239', 11: 'Object_241', 12: 'Object_247', // Middle
-    13: 'Object_212', 14: 'Object_256', 15: 'Object_258', 16: 'Object_264', // Ring
-    17: 'Object_214', 18: 'Object_275', 19: 'Object_277', 20: 'Object_283'  // Pinky
-};
+const BONE_MAP = [
+    { bone: 'Thumb_01', from: 1, to: 2 },
+    { bone: 'Thumb_02', from: 2, to: 3 },
+    { bone: 'Thumb_03', from: 3, to: 4 },
+
+    { bone: 'Index_01', from: 5, to: 6 },
+    { bone: 'Index_02', from: 6, to: 7 },
+    { bone: 'Index_03', from: 7, to: 8 },
+
+    { bone: 'Middle_01', from: 9, to: 10 },
+    { bone: 'Middle_02', from: 10, to: 11 },
+    { bone: 'Middle_03', from: 11, to: 12 },
+
+    { bone: 'Ring_01', from: 13, to: 14 },
+    { bone: 'Ring_02', from: 14, to: 15 },
+    { bone: 'Ring_03', from: 15, to: 16 },
+
+    { bone: 'Pinky_01', from: 17, to: 18 },
+    { bone: 'Pinky_02', from: 18, to: 19 },
+    { bone: 'Pinky_03', from: 19, to: 20 },
+];
 
 export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
-    const { scene } = useGLTF('/models/steampunk_arm_test.glb');
+    const { scene } = useGLTF('/models/SteamPunkArmdTest.glb');
     const groupRef = useRef<THREE.Group>(null);
     const repulsorRef = useRef<THREE.Mesh>(null);
     const repulsorLightRef = useRef<THREE.PointLight>(null);
@@ -31,14 +44,16 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         cloned.updateWorldMatrix(true, true);
 
         const offset = new THREE.Vector3();
-        const jointObjects: Record<number, THREE.Object3D> = {};
+        const jointObjects: Record<string, THREE.Bone> = {};
 
-        Object.entries(LANDMARK_MAP).forEach(([id, name]) => {
-            const obj = cloned.getObjectByName(name);
-            if (obj) jointObjects[parseInt(id)] = obj;
+        cloned.traverse((obj) => {
+            const bone = obj as THREE.Bone;
+            if (bone.isBone) {
+                jointObjects[bone.name] = bone;
+            }
         });
 
-        const wristObj = cloned.getObjectByName('Object_28');
+        const wristObj = cloned.getObjectByName('Wrist_01');
         if (wristObj) wristObj.getWorldPosition(offset);
 
         return { clonedScene: cloned, wristOffset: offset, joints: jointObjects };
@@ -54,6 +69,7 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         }
 
         const hand = data.landmarks[handIndex];
+        const BONE_FORWARD = new THREE.Vector3(0, -1, 0)
         const handedness = data.handedness[handIndex];
         if (!hand || hand.length === 0) {
             groupRef.current.visible = false;
@@ -66,12 +82,13 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         const wrist = hand[0];
         const indexMCP = hand[5];
         const middleMCP = hand[9];
+        const ringMCP = hand[13];
         const pinkyMCP = hand[17];
 
         if (!wrist || !middleMCP || !indexMCP || !pinkyMCP) return;
 
         const x = (wrist.x - 0.5) * viewport.width * -1;
-        const y = -(wrist.y - 0.5) * viewport.height;
+        const y = -(wrist.y - 0.5) * viewport.height * -1;
         const z = wrist.z * -5;
         groupRef.current.position.set(x, y, z);
 
@@ -97,32 +114,13 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
         matrix.makeBasis(orthoSide, handPlaneUp, forward);
         groupRef.current.quaternion.setFromRotationMatrix(matrix);
 
-        const gesture = detectGesture(hand);
 
-        if (repulsorRef.current && repulsorLightRef.current) {
-            const isActive = gesture === 'PALM_OPEN' || gesture === 'REPULSOR_POSE';
-            const targetIntensity = isActive ? 5 : 0;
-            const targetScale = isActive ? 1.2 : 0.001;
+        BONE_MAP.forEach(({ bone, from, to }) => {
+            const obj = joints[bone];
+            if (!obj) return;
 
-            repulsorLightRef.current.intensity += (targetIntensity - repulsorLightRef.current.intensity) * 0.15;
-            const s = repulsorRef.current.scale.x;
-            const ns = s + (targetScale - s) * 0.15;
-            repulsorRef.current.scale.set(ns, ns, ns);
-
-            repulsorRef.current.position.set(
-                -(middleMCP.x - wrist.x) * viewport.width * (isRightHand ? -1 : 1),
-                -(middleMCP.y - wrist.y) * viewport.height,
-                (middleMCP.z - wrist.z) * -5
-            );
-        }
-
-        Object.entries(joints).forEach(([idStr, obj]) => {
-            const id = parseInt(idStr);
-            // Tips don't have a child to look at for direction
-            if (id === 0 || [4, 8, 12, 16, 20].includes(id)) return;
-
-            const landmark = hand[id];
-            const nextLandmark = hand[id + 1];
+            const landmark = hand[from];
+            const nextLandmark = hand[to];
 
             if (landmark && nextLandmark) {
                 const targetDir = new THREE.Vector3(
@@ -137,17 +135,24 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
                     targetDir.applyQuaternion(q.invert());
                 }
 
+                if (targetDir.lengthSq() < 1e-8) return;
                 const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
-                    new THREE.Vector3(0, -1, 0),
-                    targetDir
+
+                    BONE_FORWARD.clone().normalize(),
+                    targetDir.clone().normalize()
+
+
                 );
+
+
+
 
                 // Hierarchy-based slerp for natural cascading effect
                 // Speed increases from Root to Tip for a "folding" look
                 let slerpFactor = 0.2;
-                const isRoot = [1, 5, 9, 13, 17].includes(id);     // MCP
-                const isMiddle = [2, 6, 10, 14, 18].includes(id);   // PIP
-                const isDistal = [3, 7, 11, 15, 19].includes(id);   // DIP
+                const isRoot = [1, 5, 9, 13, 17].includes(from);     // MCP
+                const isMiddle = [2, 6, 10, 14, 18].includes(from);   // PIP
+                const isDistal = [3, 7, 11, 15, 19].includes(from);   // DIP
 
                 if (isRoot) slerpFactor = 0.1;      // Root: deliberate
                 else if (isMiddle) slerpFactor = 0.25; // Middle: active
@@ -170,4 +175,4 @@ export function HandModel({ handDataRef, handIndex = 0 }: HandModelProps) {
     );
 }
 
-useGLTF.preload('/models/steampunk_arm.glb');
+useGLTF.preload('/models/SteamPunkArmdTest.glb');
